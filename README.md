@@ -1,2 +1,2 @@
 # scrape_Real_estate_NL
-Scrape rent/buy listings close to Amsterdam to further on analyse different options according to price and other characteristics.
+Scrape Rent/Buy(newProjects/ExistingBuildings/Land) listings in NL (Ams/Lei/Utr/Hag/Rot) to then make analyses based on price and other characteristics.
