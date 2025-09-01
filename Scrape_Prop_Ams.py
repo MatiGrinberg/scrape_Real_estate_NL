@@ -67,38 +67,3 @@ plot_correlation_heatmap(df, ['Price', 'Area', pr_per_u],k)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# Rent_Analyse
-#Filtering Rows via individual criteria
-excl_locs=['Vilafranca del Penedès']
-fil_row=filter_buy_rows(df,min_h=1,min_price_sqm=0,max_price_sqm=1.5,min_area_any=70,min_area_large=100,min_hab_large=1,max_size=250).sort_values(['Area','Price/SqM']).drop('Hab',axis=1)
-print(len(fil_row),'\n',fil_row)
-locs=mean_by_location(fil_row,'Price/SqM')
-filter_per_loc(fil_row,'Vilafranca del Penedès')
-#df[df['Price/SqM']<0.2].sort_values('Area')
-
-
-# Analysis Data
-boxplot_location_groups(df,y_col='Price')
-print_df_by_var(df,['Price', 'Area', 'Price/room'],k)
-plot_price_vs_size(df,k+' => Price vs Size','Price','Area')
-plot_price_vs_size(df,k+' => Price/room vs Hab','Price/room','Hab')
-plot_price_vs_size(df,k+' => Price/room vs Size','Price/room','Area')
-plot_histogram(df,k,'Price/room')
-plot_histogram(df,k,'Price')
-plot_histogram(df,k,'Area')
-plot_correlation_heatmap(df,['Price', 'Area', 'Hab', 'Price/room'],k)
-
-
-
