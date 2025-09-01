@@ -26,11 +26,15 @@ else:
         pr_per_u='Price/SqM'
         drop_cols.append('Price/room')
 print(drop_cols)
-df=prepare_data(df,rent=rent,drop_cols=drop_cols) # add if not Project => drop_dupl
+df=prepare_data(df,drop_cols=drop_cols) # if  Project => skip drop_dupl
 print(df.shape)
 round(df.describe(),1)
 
 #Analyse
+locs=mean_by_location(df[df['Bedrooms']==1],pr_per_u)
+#print(df[(df["Location"].isin(locs[:7])) & (df["Bedrooms"] == 1)].sort_values(pr_per_u))
+locs=mean_by_location(df[df['Bedrooms']!=1],pr_per_u)
+#print(df[(df["Location"].isin(locs[:8])) & (df["Bedrooms"] != 1)].sort_values(pr_per_u))
 locs=mean_by_location(df,pr_per_u)
 fil_loc=filter_per_loc(df,'Amsterdam',pr_per_u)
 print(fil_loc)
@@ -41,7 +45,7 @@ pprint(fil_loc.Link.tolist())
 df=df.join(backup_df['Y'])
 exc_loc,inc_loc=[],[]
 if rent:
-    filt=filter_rent_rows(df,mx_pr_1h=1.4,mx_pr_room=0.7,min_area_1h=55,min_area_2h=75,min_area_3h=90,exclude=exc_loc,include=inc_loc).sort_values(['Bedrooms','Area','Price'])#.drop('Location',axis=1)
+    filt=filter_rent_rows(df,mx_pr_1h=0.4,mx_pr_room=0.5,min_area_1h=55,min_area_2h=70,min_area_3h=90,exclude=exc_loc,include=inc_loc).sort_values(['Bedrooms','Area','Price'])#.drop('Location',axis=1)
 else:
     if not proj:
         filt=filter_buy_rows(df,min_h=1,min_price_sqm=2,max_price_sqm=6,min_area_any=47,min_area_large=100,min_hab_large=3,max_size=140).sort_values(['Price/SqM','Area']).drop('Bedrooms',axis=1)
@@ -57,6 +61,7 @@ group_idxs=print_by_group(filt,'Location',pr_per_u)
 # Analysis Data
 boxplot_location_groups(df[df['Bedrooms']==1],y_col=pr_per_u)
 boxplot_location_groups(df[df['Bedrooms']!=1],y_col=pr_per_u)
+boxplot_location_groups(df,y_col=pr_per_u)
 #ams=filter_per_loc(df,'Amsterdam',pr_per_u)
 #print_df_by_var(df,['Price', 'Area', pr_per_u],k)
 plot_price_vs_size(df,k+' => Price vs Size','Price','Area')

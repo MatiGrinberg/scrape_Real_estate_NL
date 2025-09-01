@@ -66,11 +66,13 @@ def inspect_dataframe(df):
         print(f"\n{col} ({len(unique_vals)} unique):\n {unique_vals}")
     print("\n")
 
-def prepare_data(df,min_sz=47,max_pr=325,price_col='Price',size_col='Area',price_per_sqm_col='Price/SqM',hab_col='Bedrooms',rent=False,drop_dupl=None,drop_cols=None):
+def prepare_data(df,min_sz=47,max_pr=325,price_col='Price',size_col='Area',price_per_sqm_col='Price/SqM',hab_col='Bedrooms',drop_dupl=None,drop_cols=None):
     df[hab_col] = df[hab_col].fillna(0)
     df[price_col] = (df[price_col].astype(float) / 1000).round(1)
     df[price_per_sqm_col] = (df[price_col] / df[size_col]).round(1)
     df['Price/room'] = (df[price_col] / df[hab_col]).round(1)
+    df=df[(df[price_col] <= max_pr)&(df[hab_col] < 10)]
+    print(df.shape)
     df=df[(df[price_col] <= max_pr)& (df['Area'] >= min_sz) & (df[hab_col] < 10)]
     print(df.shape)
     if drop_dupl is not None:
