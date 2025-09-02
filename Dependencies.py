@@ -71,10 +71,7 @@ def prepare_data(df,min_sz=47,max_pr=325,price_col='Price',size_col='Area',price
     df[price_col] = (df[price_col].astype(float) / 1000).round(1)
     df[price_per_sqm_col] = (df[price_col] / df[size_col]).round(1)
     df['Price/room'] = (df[price_col] / df[hab_col]).round(1)
-    df=df[(df[price_col] <= max_pr)&(df[hab_col] < 10)]
-    print(df.shape)
     df=df[(df[price_col] <= max_pr)& (df['Area'] >= min_sz) & (df[hab_col] < 10)]
-    print(df.shape)
     if drop_dupl is not None:
         print(df.loc[df.duplicated(subset=drop_dupl, keep=False), drop_dupl].sort_values(by=drop_dupl))
         df = df.drop_duplicates(subset=drop_dupl)#.reset_index(drop=True)
@@ -83,13 +80,14 @@ def prepare_data(df,min_sz=47,max_pr=325,price_col='Price',size_col='Area',price
         df = df.drop(columns=drop_cols, errors='ignore')
     return df
 
-def print_by_group(d,col,s):
-    gr=d.groupby(col,sort=False)
-    groups_idxs={}
+def print_by_group(d, col, s, dr=None):
+    cols_to_drop = [col] + (dr or [])
+    gr = d.groupby(col, sort=False)
+    groups_idxs = {}
     for c, g in gr:
         print(f"\n\n--- {c} ---")
-        print(g.sort_values(s).drop(col,axis=1))
-        groups_idxs[c]=g.index.tolist()
+        print(g.sort_values(s).drop(columns=cols_to_drop, errors="ignore"))
+        groups_idxs[c] = g.index.tolist()
     return groups_idxs
         
 def filter_rent_rows(df, mx_pr_1h=1.2, mx_pr_room=0.8, min_area_1h=60,min_area_2h=75,min_area_3h=100,include=None,exclude=None,s="Price/room"):
@@ -103,10 +101,12 @@ def filter_rent_rows(df, mx_pr_1h=1.2, mx_pr_room=0.8, min_area_1h=60,min_area_2
         res = res[res['Location'].isin(include)]
     return res
 
-def filter_buy_rows(df,min_h=2,min_price_sqm=1.5,max_price_sqm=3,min_area_any=55,min_area_large=100,min_hab_large=3,max_size=150,fr=1970,to=2036,excl=None,incl=None,s="Price/SqM"):
-    base = (df['Price/SqM'] <= max_price_sqm)&(df['Price/SqM'] >= min_price_sqm) & (df['Area'] >= min_area_any)&(df['Bedrooms'] >= min_h)&(df['Area']<=max_size)#&(df['Y']>=fr)&(df['Y']<=to)
+def filter_buy_rows(df,min_h=2,min_price_sqm=1.5,max_price_sqm=3,min_area_any=55,min_area_large=100,min_hab_large=3,max_size=150,fr=None,to=None,excl=None,incl=None,s="Price/SqM"):
+    base=(df['Price/SqM'] <= max_price_sqm)&(df['Price/SqM'] >= min_price_sqm) & (df['Area'] >= min_area_any)&(df['Bedrooms'] >= min_h)&(df['Area']<=max_size)
     large_area_rule = (df['Area'] < min_area_large) | ((df['Area'] >= min_area_large) & (df['Bedrooms'] >= min_hab_large))
     res=df[base&large_area_rule]#.sort_values(s)
+    if fr is not None and to is not None:
+        res = res[(res['Y'] >= fr) & (res['Y'] <= to)]
     if excl:
         res=res[~res['Location'].isin(excl)]
     if incl:

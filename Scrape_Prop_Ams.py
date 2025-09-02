@@ -1,11 +1,12 @@
 from Dependencies import *
+# Pr x Sqm => New 5.2, Land 1, Built 4.2, Rent 1.3
 #df=scrape_huurwoningen_rent(["den-haag", "utrecht", "amsterdam","leiden"])
 #df=scrape_funda([r_funda,land,b_funda,p_funda],prop_typ=["Rent", "Land", "Buy", "Project"])
 funda_dfs,huurw_df={f"funda_{t}": d for t,d in pd.read_csv("funda.csv").groupby("type")}, pd.read_csv("rent_huurwoningen.csv")
 datasets={"huurwoningen_Rent": huurw_df}
 datasets.update(funda_dfs)
 print(datasets.keys())
-k='funda_Project'
+k='funda_Rent'
 backup_df,df=datasets[k].copy(),datasets[k].copy()
 #print(len(df.property_url.unique()))
 print(df.shape)
@@ -44,18 +45,18 @@ pprint(fil_loc.Link.tolist())
 # Filtering Rows via individual criteria
 df=df.join(backup_df['Y'])
 exc_loc,inc_loc=[],[]
-if rent:
+if rent: # rent
     filt=filter_rent_rows(df,mx_pr_1h=0.4,mx_pr_room=0.5,min_area_1h=55,min_area_2h=70,min_area_3h=90,exclude=exc_loc,include=inc_loc).sort_values(['Bedrooms','Area','Price'])#.drop('Location',axis=1)
-else:
-    if not proj:
-        filt=filter_buy_rows(df,min_h=1,min_price_sqm=2,max_price_sqm=6,min_area_any=47,min_area_large=100,min_hab_large=3,max_size=140).sort_values(['Price/SqM','Area']).drop('Bedrooms',axis=1)
-    else:
+else: 
+    if not proj: # Built
+        filt=filter_buy_rows(df,min_h=1,min_price_sqm=2,max_price_sqm=4.5,min_area_any=55,min_area_large=100,min_hab_large=3,max_size=140,fr=2010,to=2040).sort_values(['Price/SqM','Area']).drop('Bedrooms',axis=1)
+    else: # Project
         df=df.join(backup_df['Name_Prop'])
-        filt=filter_buy_rows(df,min_h=0,min_price_sqm=3.3,max_price_sqm=5.9,min_area_any=47,min_area_large=0,min_hab_large=0,max_size=140).sort_values(['Price/SqM','Area']).drop('Bedrooms',axis=1)
+        filt=filter_buy_rows(df,min_h=0,min_price_sqm=2.3,max_price_sqm=5.5,min_area_any=50,min_area_large=0,min_hab_large=0,max_size=140).sort_values(['Price/SqM','Area']).drop('Bedrooms',axis=1)
 print(len(filt),'\n',filt)
 mean_by_location(filt,pr_per_u)
 #group_idxs=print_by_group(filt.drop("Link",axis=1),'Bedrooms',pr_per_u)
-group_idxs=print_by_group(filt,'Location',pr_per_u)
+group_idxs=print_by_group(filt,'Location',pr_per_u,dr=[])
 
 
 # Analysis Data
